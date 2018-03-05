@@ -5,6 +5,7 @@ import (
 	"github.com/linxinzhe/go-simple-coin/datastruct"
 )
 
+//Test Genesis Block
 func main() {
 	bc := datastruct.GenesisBlockchain()
 
@@ -18,3 +19,17 @@ func main() {
 		fmt.Println()
 	}
 }
+
+//Test proof of work
+//func main() {
+//
+//	data1 := []byte("I like donuts")
+//	data2 := []byte("I like donutsca07ca")
+//	target := big.NewInt(1)
+//	target.Lsh(target, uint(256-pow.TargetBits))
+//	fmt.Printf("%x\n", sha256.Sum256(data1))
+//	fmt.Printf("%64x\n", target)
+//	fmt.Printf("%x\n", sha256.Sum256(data2))
+//
+//	fmt.Println(len("0000000000000000000000000000000000000000000000000000000000"))
+//}
