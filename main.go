@@ -1,28 +1,29 @@
 package main
 
 import (
-	. "github.com/linxinzhe/go-simple-coin/datastruct"
-	. "github.com/linxinzhe/go-simple-coin/cli"
+	"fmt"
+	"github.com/linxinzhe/go-simple-coin/datastruct"
+	"strconv"
 )
 
 //Test Genesis Block
-//func main() {
-//bc := datastruct.NewBlockchain()
-//
-//bc.AddBlock("Send 1 BTC to Lin")
-//bc.AddBlock("Send 2 BTC to Lin")
+func main() {
+	bc := datastruct.NewBlockchain()
 
-//for _, block := range bc.Blocks {
-//fmt.Printf("Prev. hash: %x\n", block.PrevBlockHash)
-//fmt.Printf("Data: %s\n", block.Data)
-//fmt.Printf("Hash: %x\n", block.Hash)
-//fmt.Println()
-//
-//pow := datastruct.NewProofOfWork(block)
-//fmt.Printf("PoW: %s\n", strconv.FormatBool(pow.Validate()))
-//fmt.Println()
-//}
-//}
+	bc.AddBlock("Send 1 BTC to Lin")
+	bc.AddBlock("Send 2 BTC to Lin")
+
+	//for _, block := range bc.Blocks {
+		//fmt.Printf("Prev. hash: %x\n", block.PrevBlockHash)
+		//fmt.Printf("Data: %s\n", block.Data)
+		//fmt.Printf("Hash: %x\n", block.Hash)
+		//fmt.Println()
+		//
+		//pow := datastruct.NewProofOfWork(block)
+		//fmt.Printf("PoW: %s\n", strconv.FormatBool(pow.Validate()))
+		//fmt.Println()
+	//}
+}
 
 //Test proof of work
 //func main() {
@@ -37,12 +38,3 @@ import (
 //
 //	fmt.Println(len("0000000000000000000000000000000000000000000000000000000000"))
 //}
-
-//Test DB blockchain
-func main() {
-	bc := NewBlockchain()
-	defer bc.DB.Close()
-
-	cli := CLI{bc}
-	cli.Run()
-}

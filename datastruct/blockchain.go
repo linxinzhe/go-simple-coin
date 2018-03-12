@@ -2,22 +2,22 @@ package datastruct
 
 import "github.com/coreos/bbolt"
 
-const dbFile = "blockchain_%s.DB"
+const dbFile = "blockchain_%s.db"
 const blocksBucket = "blocks"
 const genesisCoinbaseData = "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks"
 
 type Blockchain struct {
 	tip []byte
-	DB  *bolt.DB
+	db  *bolt.DB
 }
 
 type BlockchainIterator struct {
 	currentHash []byte
-	DB          *bolt.DB
+	db          *bolt.DB
 }
 
 func (bc *Blockchain) Iterator() *BlockchainIterator {
-	bci := &BlockchainIterator{bc.tip, bc.DB}
+	bci := &BlockchainIterator{bc.tip, bc.db}
 
 	return bci
 }
@@ -25,7 +25,7 @@ func (bc *Blockchain) Iterator() *BlockchainIterator {
 func (i *BlockchainIterator) Next() *Block {
 	var block *Block
 
-	_ = i.DB.View(func(tx *bolt.Tx) error {
+	_ = i.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(blocksBucket))
 		encodedBlock := b.Get(i.currentHash)
 		block = DeserializeBlock(encodedBlock)
@@ -42,7 +42,7 @@ func (i *BlockchainIterator) Next() *Block {
 func (bc *Blockchain) AddBlock(data string) {
 	var lastHash []byte
 
-	err := bc.DB.View(func(tx *bolt.Tx) error {
+	err := bc.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(blocksBucket))
 		lastHash = b.Get([]byte("l"))
 
@@ -51,7 +51,7 @@ func (bc *Blockchain) AddBlock(data string) {
 
 	newBlock := NewBlock(data, lastHash)
 
-	err = bc.DB.Update(func(tx *bolt.Tx) error {
+	err = bc.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(blocksBucket))
 		_ = b.Put(newBlock.Hash, newBlock.Serialize())
 		err = b.Put([]byte("l"), newBlock.Hash)
