@@ -1,7 +1,6 @@
 package main
 
 import (
-	. "github.com/linxinzhe/go-simple-coin/datastruct"
 	. "github.com/linxinzhe/go-simple-coin/cli"
 )
 
@@ -40,9 +39,6 @@ import (
 
 //Test DB blockchain
 func main() {
-	bc := NewBlockchain()
-	defer bc.DB.Close()
-
-	cli := CLI{bc}
+	cli := CLI{}
 	cli.Run()
 }

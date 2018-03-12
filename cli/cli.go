@@ -24,43 +24,24 @@ func (cli *CLI) validateArgs() {
 		os.Exit(1)
 	}
 }
-func (cli *CLI) addBlock(data string) {
-	cli.BC.AddBlock(data)
-	fmt.Println("Success!")
-}
-
-func (cli *CLI) printChain() {
-	bci := cli.BC.Iterator()
-
-	for {
-		block := bci.Next()
-
-		fmt.Printf("Prev. hash: %x\n", block.PrevBlockHash)
-		fmt.Printf("Data: %s\n", block.Data)
-		fmt.Printf("Hash: %x\n", block.Hash)
-		pow := NewProofOfWork(block)
-		fmt.Printf("PoW: %s\n", strconv.FormatBool(pow.Validate()))
-		fmt.Println()
-
-		if len(block.PrevBlockHash) == 0 {
-			break
-		}
-	}
-}
 
 func (cli *CLI) Run() {
 	cli.validateArgs()
 
 	addBlockCmd := flag.NewFlagSet("addblock", flag.ExitOnError)
 	printChainCmd := flag.NewFlagSet("printchain", flag.ExitOnError)
+	createBlockchainCmd := flag.NewFlagSet("createblockchain", flag.ExitOnError)
 
 	addBlockData := addBlockCmd.String("data", "", "Block data")
+	createBlockchainData := createBlockchainCmd.String("address", "", "user address")
 
 	switch os.Args[1] {
 	case "addblock":
 		_ = addBlockCmd.Parse(os.Args[2:])
 	case "printchain":
 		_ = printChainCmd.Parse(os.Args[2:])
+	case "createblockchain":
+		_ = createBlockchainCmd.Parse(os.Args[2:])
 	default:
 		cli.printUsage()
 		os.Exit(1)
@@ -77,4 +58,43 @@ func (cli *CLI) Run() {
 	if printChainCmd.Parsed() {
 		cli.printChain()
 	}
+
+	if createBlockchainCmd.Parsed() {
+		if *createBlockchainData == "" {
+			createBlockchainCmd.Usage()
+			os.Exit(1)
+		}
+		cli.createBlockchain(*createBlockchainData)
+	}
+}
+
+func (cli *CLI) addBlock(address string) {
+	//cli.BC.AddBlock(address)
+	//fmt.Println("Success!")
+}
+
+func (cli *CLI) printChain() {
+	bci := cli.BC.Iterator()
+
+	for {
+		block := bci.Next()
+
+		fmt.Printf("Prev. hash: %x\n", block.PrevBlockHash)
+
+		fmt.Printf("Hash: %x\n", block.Hash)
+		pow := NewProofOfWork(block)
+		fmt.Printf("PoW: %s\n", strconv.FormatBool(pow.Validate()))
+		fmt.Println()
+
+		if len(block.PrevBlockHash) == 0 {
+			break
+		}
+	}
+}
+
+func (cli *CLI) createBlockchain(address string) {
+	bc := NewBlockchain(address)
+	defer bc.DB.Close()
+	cli.BC=bc
+	cli.printChain()
 }
