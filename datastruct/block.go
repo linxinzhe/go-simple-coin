@@ -48,3 +48,4 @@ func (block *Block) HashTransactions() []byte {
 	hash := sha256.Sum256(join)
 	return hash[:]
 }
+

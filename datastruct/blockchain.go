@@ -3,13 +3,14 @@ package datastruct
 import (
 	"github.com/coreos/bbolt"
 	"fmt"
+	"encoding/hex"
 )
 
 const dbFile = "blockchain_%s.DB"
 const blocksBucket = "blocks"
 const genesisCoinbaseData = "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks"
 
-type Blockchain struct{
+type Blockchain struct {
 	tip []byte
 	DB  *bolt.DB
 }
@@ -41,8 +42,7 @@ func (i *BlockchainIterator) Next() *Block {
 	return block
 }
 
-// AddBlock adds a block with the message you send
-func (bc *Blockchain) AddBlock(transactions []*Transaction) {
+func (bc *Blockchain) MineBlock(transactions []*Transaction) {
 	var lastHash []byte
 
 	err := bc.DB.View(func(tx *bolt.Tx) error {
@@ -110,4 +110,65 @@ func NewBlockchain(address string) *Blockchain {
 	bc := Blockchain{tip, db}
 
 	return &bc
+}
+
+func (bc Blockchain) FindUnspentTransactions(address string) []Transaction {
+	bci := bc.Iterator()
+	unspentTx := []Transaction{}
+	spentTXOs := make(map[string][]int)
+
+	for {
+		block := bci.Next()
+
+		for _, tx := range block.Transactions {
+			id := hex.EncodeToString(tx.ID)
+
+		Outputs:
+			for outIdx, out := range tx.Vout {
+				if spentTXOs[id] != nil {
+					for _, spentOut := range spentTXOs[id] {
+						if outIdx == spentOut {
+							continue Outputs
+						}
+					}
+				}
+
+				if out.CanBeUnlockedWith(address) {
+					unspentTx = append(unspentTx, *tx)
+				}
+			}
+
+			//add input as spent
+			if tx.IsCoinbase() {
+				for _, in := range tx.Vin {
+					if in.CanUnlockOutputWith(address) {
+						id := hex.EncodeToString(in.Txid)
+						spentTXOs[id] = append(spentTXOs[id], in.Vout)
+					}
+				}
+			}
+		}
+
+		if len(block.PrevBlockHash) == 0 {
+			break
+		}
+	}
+
+	return unspentTx
+}
+
+func (bc *Blockchain) FindUTXO(address string) []TXOutput {
+	var UTXOs []TXOutput
+
+	transactions := bc.FindUnspentTransactions(address)
+
+	for _, tx := range transactions {
+		for _, out := range tx.Vout {
+			if out.CanBeUnlockedWith(address) {
+				UTXOs = append(UTXOs, out)
+			}
+		}
+	}
+
+	return UTXOs
 }
