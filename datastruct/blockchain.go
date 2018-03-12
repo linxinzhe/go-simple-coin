@@ -139,7 +139,7 @@ func (bc Blockchain) FindUnspentTransactions(address string) []Transaction {
 			}
 
 			//add input as spent
-			if tx.IsCoinbase() {
+			if tx.IsCoinbase() == false {
 				for _, in := range tx.Vin {
 					if in.CanUnlockOutputWith(address) {
 						id := hex.EncodeToString(in.Txid)
